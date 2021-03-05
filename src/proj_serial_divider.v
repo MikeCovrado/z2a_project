@@ -16,12 +16,12 @@
 
 `default_nettype none
 
-module serial_divider #(
+module proj_serial_divider #(
     parameter WBW  =  32, // Wishbone bus width
               LAW  = 128, // Logic Analyzer width
               XLEN =  32, // Data width of Dividend, Divisor and Quotient
-//              BLINK_CYCLES = 40_000_000  // period in clk cycles of hw blink
-              BLINK_CYCLES = 32_000  // period in clk cycles of hw blink
+              BLINK_CYCLES = 40_000_000  // period in clk cycles of hw blink
+//              BLINK_CYCLES = 32_000  // period in clk cycles of hw blink
 )(
     input              clk_i,
     input              reset_i,
@@ -266,6 +266,5 @@ module serial_divider #(
       end
     end // always @(posedge clk_i)
 
-endmodule // serial_divider
-
+endmodule // proj_serial_divider 
 `default_nettype wire

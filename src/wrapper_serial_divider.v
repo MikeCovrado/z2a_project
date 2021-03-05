@@ -26,9 +26,9 @@
 `ifndef MPRJ_IO_PADS
   `define MPRJ_IO_PADS 38
 `endif
-//`include "serial_divider.v"
+//`include "proj_serial_divider.v"
 
-module wrapped_serial_divider #(
+module wrapper_serial_divider #(
     parameter WBW  = 32, // Wishbone bus width
               LAW  = 32, // Width of local instance of Logic Analyser
               XLEN = 32  // Data width of Dividend, Divisor, Quotient and Remainder
@@ -101,11 +101,11 @@ module wrapped_serial_divider #(
     assign buf_io_out = { {`MPRJ_IO_PADS-2{1'b0}}, hw_blinky, sw_blinky };
 
     // instantiate your module here, connecting what you need of the above signals
-    serial_divider #(
+    proj_serial_divider #(
         .WBW  (WBW ), // Wishbone bus width
         .LAW  (LAW ), // Logical Analyzer bus width
         .XLEN (XLEN)  // Data width of Dividend, Divisor, Quotient and Remainder
-    ) serial_divider_u0 (
+    ) serial_divider (
         .clk_i       (wb_clk_i),
         .reset_i     (wb_rst_i),
         .wbs_stb_i   (wbs_stb_i),
@@ -121,6 +121,6 @@ module wrapped_serial_divider #(
         .sw_blinky_o (sw_blinky)
     );
 
-endmodule // wrapped_serial_divider
+endmodule // wrapper_serial_divider
 
 `default_nettype wire
