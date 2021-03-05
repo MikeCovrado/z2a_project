@@ -1,0 +1,7 @@
+*.vcd
+__pycache__
+sim_build
+results.xml
+_build
+macro/runs
+.*.swp
