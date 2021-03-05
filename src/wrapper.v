@@ -121,6 +121,6 @@ module wrapped_serial_divider #(
         .sw_blinky_o (sw_blinky)
     );
 
-endmodule //mike_project
+endmodule // wrapped_serial_divider
 
 `default_nettype wire
