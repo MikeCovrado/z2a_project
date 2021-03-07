@@ -25,30 +25,50 @@ module serial_divider_ftb #(
     // Wishbone Slave ports (WB MI A)
     reg              clk;
     reg              rst;
-    wire             wbs_stb_i;
-    wire             wbs_cyc_i;
-    wire             wbs_we_i;
-    wire [WBW/8-1:0] wbs_sel_i;
-    wire [WBW-1  :0] wbs_dat_i;
-    wire [WBW-1  :0] wbs_adr_i;
+    reg              wbs_stb_i;
+    reg              wbs_cyc_i;
+    reg              wbs_we_i;
+    reg  [WBW/8-1:0] wbs_sel_i;
+    reg  [WBW-1  :0] wbs_dat_i;
+    reg  [WBW-1  :0] wbs_adr_i;
     wire             wbs_ack_o;
     wire [WBW-1  :0] wbs_dat_o;
 
+    // Select what is presented on Logical Analyzer outputs
+    localparam   SELDIVISOR   = 2'b00,
+                 SELDIVIDEND  = 2'b01,
+                 SELQUOTIENT  = 2'b10,
+                 SELREMAINDER = 2'b11;
+
     // Logic Analyzer Signals
-    wire [127:0] la_data_out;
+    reg [127:0] la_data_out;
 
-    wire         hw_blink_o;
-    wire         sw_blink_o;
+    reg         hw_blinky_o;
+    reg         sw_blinky_o;
 
+    reg         start;
+    reg         fini;
+    reg   [3:0] hw_sel;
+
+    // initial conditions
     reg f_past_valid = 0;
-    initial assume(rst);
+    initial begin
+      assume(rst);
+      assume(~wbs_stb_i);
+      assume(~wbs_cyc_i);
+      assume(~wbs_we_i);
+      assume(~|wbs_sel_i);
+      assume(~|wbs_dat_i);
+      assume(~|wbs_adr_i);
+    end
 
     always @(posedge clk) begin
       f_past_valid <= 1;
 
       // Prevent writes to both args/results and control regs in same cycle
       assume (~( |(wbs_adr_i[WBW-1:WBW-4]) & |(wbs_adr_i[WBW-5:WBW-8]) ));
-      assume (~serial_divider_u0.debug);
+      //assume (~serial_divider.debug);
+      assume ( hw_sel[3]);
 
       // No back-to-back transactions
       if (f_past_valid) begin
@@ -57,47 +77,24 @@ module serial_divider_ftb #(
       end
 
       if (f_past_valid) begin
-        //_set_dividend_:  cover( (la_data_out[31:0] == serial_divider_u0.dividend ) &&
-        //                        (la_data_out[31:0] != 32'h0000_0000              ) );
-
-        _calc_quotient_: cover ( (la_data_out[31:0] == 32'h0000_0004) &&
-                                 (fini              == 1'b1         ) );
+       // let's see an easy division operation actually happen
+        _calc_quotient_: cover ( (la_data_out[31:0]       == 32'h0000_0004) &&
+                                 (hw_sel[1:0]             == SELQUOTIENT)   &&
+                                 (fini                    == 1'b1         ) );
 
         _set_start_:     cover (start == 1'b1);
 
-        /*
-        _set_divisor_:  cover( (la_data_out[ 95:64] == serial_divider_u0.divisor  ) &&
-                               (la_data_out[ 95:64] != 32'h0000_0000              ) );
-
-        _set_d_and_d_:  cover( (la_data_out[ 95:64] == serial_divider_u0.divisor  ) &&
-                               (la_data_out[127:96] == serial_divider_u0.dividend ) &&
-                               (la_data_out[ 95:64] != 32'h0000_0000              ) &&
-                               (la_data_out[127:96] != 32'h0000_0000              ) );
-
-        _set_all_:      cover( (la_data_out[127:96] == serial_divider_u0.dividend ) &&
-                               (la_data_out[ 95:64] == serial_divider_u0.divisor  ) &&
-                               (la_data_out[ 63:32] == serial_divider_u0.quotient ) &&
-                               (la_data_out[ 31: 0] == serial_divider_u0.remainder) &&
-                               (la_data_out[127:96] != 32'h0000_0000              ) &&
-                               (la_data_out[ 95:64] != 32'h0000_0000              ) &&
-                               (la_data_out[ 63:32] != 32'h0000_0000              ) &&
-                               (la_data_out[ 31: 0] != 32'h0000_0000              ) );
-        */
       end
     end
 
-    serial_divider #(
+    proj_serial_divider #(
         .WBW  (32),
         .LAW  (32),
         .XLEN (32),
         .BLINK_CYCLES (32_000),
-    ) serial_divider_u0 (
+    ) serial_divider (
         .clk_i       (clk),
         .reset_i     (rst),
-
-        .start_o     (start),
-        .fini_o      (fini),
-
         .wbs_stb_i   (wbs_stb_i),
         .wbs_cyc_i   (wbs_cyc_i),
         .wbs_we_i    (wbs_we_i),
@@ -106,9 +103,12 @@ module serial_divider_ftb #(
         .wbs_dat_i   (wbs_dat_i),
         .wbs_ack_o   (wbs_ack_o),
         .wbs_dat_o   (wbs_dat_o),
-        .la_data_o   (la_data_out),
+        .la_data_o   (la_data_out[31:0]),
         .hw_blinky_o (hw_blinky_o),
-        .sw_blinky_o (sw_blinky_o)
+        .sw_blinky_o (sw_blinky_o),
+        .start_o     (start),
+        .fini_o      (fini),
+        .hw_sel_i    (hw_sel)
     );
 
 endmodule: serial_divider_ftb

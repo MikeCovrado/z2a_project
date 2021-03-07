@@ -4,10 +4,10 @@
 # information
 project: 
   title: "Serial Divider"
-  description: "Serial Divider accessed by Caravel's PicoRV32 core via wishbone"
+  description: "Serial Divider memory mapped to Caravel's PicoRV32 core via wishbone"
   picture: 
   author: "Mike Thompson"
-  github: https://github.com/mattvenn/XXXX/tree/multi_proj_tools
+  github: https://github.com/MikeCovrado/z2a_project
   license: LICENSE
 
 # test within caravel
@@ -20,13 +20,13 @@ caravel_test:
 
 # module test
 module_test:
-  recipe: "test_wrapper" 
-  directory: "."
+  recipe: "sby"
+  directory: "fv/module_test"
   makefile: "Makefile"
 
 # run the wrapper formal proof
 wrapper_proof:
-  directory: "."
+  directory: "fv/wrapper"
   sby: "sim/properties.sby"
 
 # check the wrapper hasn't changed except for the module instantiation
