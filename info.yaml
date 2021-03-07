@@ -27,7 +27,7 @@ module_test:
 # run the wrapper formal proof
 wrapper_proof:
   directory: "fv/wrapper"
-  sby: "sim/properties.sby"
+  sby: "properties.sby"
 
 # check the wrapper hasn't changed except for the module instantiation
 wrapper_cksum:

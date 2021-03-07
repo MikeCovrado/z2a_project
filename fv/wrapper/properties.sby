@@ -1,0 +1,14 @@
+[options]
+mode prove
+
+[engines]
+smtbmc
+
+[script]
+read -formal wrapper_serial_divider.v proj_serial_divider.v
+prep -top wrapper_serial_divider
+
+[files]
+../../src/wrapper_serial_divider.v
+../../src/proj_serial_divider.v
+properties.v

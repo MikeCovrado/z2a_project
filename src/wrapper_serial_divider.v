@@ -30,7 +30,7 @@
   `define MPRJ_IO_PADS 38
 `endif
 
-`include "mike_proj_rtl/proj_serial_divider.v"
+//`include "mike_proj_rtl/proj_serial_divider.v"
 
 module wrapper_serial_divider #(
     parameter WBW  = 32, // Wishbone bus width
@@ -94,7 +94,7 @@ module wrapper_serial_divider #(
 
 `ifdef FORMAL
     // formal can't deal with z, so set all outputs to 0 if not active
-    assign wbs_ack_o    = active ? buf_wbs_ack_o    : {              1'b0}};
+    assign wbs_ack_o    = active ? buf_wbs_ack_o    :                1'b0;
     assign wbs_dat_o    = active ? buf_wbs_dat_o    : {          WBW{1'b0}};
     assign la_data_out  = active ? buf_la_data_out  : {          LAW{1'b0}};
     assign io_out       = active ? buf_io_out       : {`MPRJ_IO_PADS{1'b0}};
@@ -141,9 +141,9 @@ module wrapper_serial_divider #(
         .wbs_sel_i   (wbs_sel_i),
         .wbs_adr_i   (wbs_adr_i),
         .wbs_dat_i   (wbs_dat_i),
-        .wbs_ack_o   (wbs_ack_o),
-        .wbs_dat_o   (wbs_dat_o),
-        .la_data_o   (la_data_out),
+        .wbs_ack_o   (buf_wbs_ack_o),
+        .wbs_dat_o   (buf_wbs_dat_o),
+        .la_data_o   (buf_la_data_out),
         .hw_blinky_o (hw_blinky),
         .sw_blinky_o (sw_blinky),
         .start_o     (div_start),
