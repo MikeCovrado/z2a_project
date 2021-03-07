@@ -21,12 +21,16 @@
 // project wrapper for the Caravel user project.
 //
 
+`ifndef _WRAPPER_SERIAL_DIVIDER_
+`define _WRAPPER_SERIAL_DIVIDER_
+
 `default_nettype none
 
 `ifndef MPRJ_IO_PADS
   `define MPRJ_IO_PADS 38
 `endif
-//`include "proj_serial_divider.v"
+
+`include "mike_proj_rtl/proj_serial_divider.v"
 
 module wrapper_serial_divider #(
     parameter WBW  = 32, // Wishbone bus width
@@ -77,6 +81,17 @@ module wrapper_serial_divider #(
     wire [`MPRJ_IO_PADS-1:0] buf_io_out;
     wire [`MPRJ_IO_PADS-1:0] buf_io_oeb;
 
+    // Divider operation start/finish
+    wire                     div_start;
+    wire                     div_fini;
+
+    // wires to connect LED control to IO_PADs
+    wire                     hw_blinky;
+    wire                     sw_blinky;
+
+    // selector for la_out
+    wire [              3:0] hw_sel;
+
 `ifdef FORMAL
     // formal can't deal with z, so set all outputs to 0 if not active
     assign wbs_ack_o    = active ? buf_wbs_ack_o    : {              1'b0}};
@@ -94,13 +109,25 @@ module wrapper_serial_divider #(
     assign io_oeb       = active ? buf_io_oeb       : {`MPRJ_IO_PADS{1'bZ}};
 `endif
 
+/*
+    // permanently set oeb so that lower nibble of IO_PADs are inputs and all others are outputs
+    // 0 is output, 1 is high-impedance
+    assign buf_io_oeb = { {`MPRJ_IO_PADS-4{1'b0}}, 4'b1111 };
+
+    // drive the blinky lights; tie-off unused outputs
+    assign buf_io_out = { {`MPRJ_IO_PADS-6{1'b0}}, hw_blinky, sw_blinky, 4'b0000 };
+
+    // Low order bits of can be used to select la_data_out
+    assign hw_sel     = io_in[3:0];
+*/
     // permanently set oeb so that outputs are always enabled: 0 is output, 1 is high-impedance
     assign buf_io_oeb = {`MPRJ_IO_PADS{1'b0}};
 
-    // drive the blinky lights; tie-off unused outputs
+    // tie-off unused outputs
     assign buf_io_out = { {`MPRJ_IO_PADS-2{1'b0}}, hw_blinky, sw_blinky };
+    assign hw_sel     = 4'h0;
 
-    // instantiate your module here, connecting what you need of the above signals
+    // The _actual_ project!
     proj_serial_divider #(
         .WBW  (WBW ), // Wishbone bus width
         .LAW  (LAW ), // Logical Analyzer bus width
@@ -118,9 +145,14 @@ module wrapper_serial_divider #(
         .wbs_dat_o   (wbs_dat_o),
         .la_data_o   (la_data_out),
         .hw_blinky_o (hw_blinky),
-        .sw_blinky_o (sw_blinky)
+        .sw_blinky_o (sw_blinky),
+        .start_o     (div_start),
+        .fini_o      (div_fini),
+        .hw_sel_i    (hw_sel)
     );
 
 endmodule // wrapper_serial_divider
 
 `default_nettype wire
+
+`endif // _WRAPPER_SERIAL_DIVIDER_

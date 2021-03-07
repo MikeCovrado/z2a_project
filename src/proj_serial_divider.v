@@ -14,6 +14,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.0
 
+`ifndef _PROJ_SERIAL_DIVIDER_
+`define _PROJ_SERIAL_DIVIDER_
+
 `default_nettype none
 
 module proj_serial_divider #(
@@ -25,9 +28,6 @@ module proj_serial_divider #(
 )(
     input              clk_i,
     input              reset_i,
-    // Hacking...
-    output             start_o,
-    output             fini_o,
     // Wishbone
     input              wbs_stb_i,
     input              wbs_cyc_i,
@@ -41,7 +41,11 @@ module proj_serial_divider #(
     output [  LAW-1:0] la_data_o,
     // No project is truly complete without blinking LEDs
     output             hw_blinky_o,  // hardware control
-    output             sw_blinky_o   // software control
+    output             sw_blinky_o,  // software control
+    // Design-for-verification (these are not required for correct function).
+    output             start_o,
+    output             fini_o,
+    input  [      3:0] hw_sel_i
 );
 
     localparam HWBCW = $clog2(BLINK_CYCLES/2); // hardware blink counter width
@@ -51,7 +55,7 @@ module proj_serial_divider #(
     wire            fini_o;
     wire            wbs_ack_o;
     wire [ WBW-1:0] wbs_dat_o;
-    wire [ LAW-1:0] la_data_o;
+    reg  [ LAW-1:0] la_data_o;
     reg             hw_blinky_o;
     reg             sw_blinky_o;
 
@@ -64,17 +68,13 @@ module proj_serial_divider #(
 
     assign wbs_ack_o = ack;
     assign wbs_dat_o = rdata;
-`ifdef FORMAL
-    assign la_data_o = quotient;
-`else
-    assign la_data_o = dividend;
-`endif //FORMAL
 
     // Control Regs
-    reg start;
-    reg debug;
-    reg running;
-    reg fini;
+    reg       start;
+    reg       debug;
+    reg       running;
+    reg [1:0] la_sel;
+    reg       fini;
 
     // Function arguments and results
     reg  [ XLEN-1:0] dividend;
@@ -88,8 +88,34 @@ module proj_serial_divider #(
     reg  [HWBCW-1:0] hw_blink_cntr;
     reg  [     31:0] tmp_divisor;
 
+`ifdef FORMAL
+    always @(posedge clk_i) assume (~debug);
+`endif
+
+    // logical analyzer select:
+    // if hw_sel[3] is set, then hardware pins selects,
+    // otherwise software selects.
+    always @(*) begin
+      if (hw_sel_i[3]) begin
+        case (hw_sel_i[1:0])
+          2'b00: la_data_o = divisor;
+          2'b01: la_data_o = dividend;
+          2'b10: la_data_o = quotient;
+          2'b11: la_data_o = remainder;
+        endcase
+      end
+      else begin
+        case (la_sel)
+          2'b00: la_data_o = divisor;
+          2'b01: la_data_o = dividend;
+          2'b10: la_data_o = quotient;
+          2'b11: la_data_o = remainder;
+        endcase
+      end
+    end
+
     ///////////////////////////////////////////////////////////////////////////
-    // Wishbone control logic
+    // Wishbone control logic (deliberately wasting address space here)
     //    +--CSR----+---Address---+------Access Mode-------------------
     //     DIVIDEND  32'h3000_0000  write/read
     //     DIVISOR   32'h3000_0004  write/read
@@ -99,6 +125,7 @@ module proj_serial_divider #(
     //     FINI      32'h3000_0014  read-only
     //     START     32'h3000_0018  set-on-write-or-read (cannot be read)
     //     SW_BLINKY 32'h3000_001C  set-on-write, clear-on-read
+    //     LA_SEL    32'h3000_0020  write/read
 
     always @(posedge clk_i) begin
       if (reset_i) begin
@@ -110,6 +137,7 @@ module proj_serial_divider #(
         ack           <= 1'b0;
         start         <= 1'b0;
         debug         <= 1'b0;
+        la_sel        <= 2'b00;
         sw_blinky_o   <= 1'b1;
       end
       else begin
@@ -122,9 +150,9 @@ module proj_serial_divider #(
           ack <= 1'b1;
           // Top nibble addresses args/results
           if (wbs_adr_i[WBW-1:WBW-4] == 4'h3) begin
-            case (wbs_adr_i[4:0]) // TODO: could (should?) make this [4:2]
+            case (wbs_adr_i[5:0]) // TODO: could (should?) make this [5:2]
               // DIVIDEND at 32'h3000_0000 is write/read
-              5'b0_0000: begin
+              6'b00_0000: begin
                 if (wbs_we_i) begin
                   if (wbs_sel_i[0]) dividend[ 7: 0] <= wbs_dat_i[ 7: 0];
                   if (wbs_sel_i[1]) dividend[15: 8] <= wbs_dat_i[15: 8];
@@ -139,7 +167,7 @@ module proj_serial_divider #(
                 end
               end
               // DIVISOR at 32'h3000_0004 is write/read
-              5'b0_0100: begin
+              6'b00_0100: begin
                 if (wbs_we_i) begin
                   divisor <= wbs_dat_i;
                 end
@@ -148,7 +176,7 @@ module proj_serial_divider #(
                 end
               end
               // QUOTIENT at 32'h3000_0008 is read-only unless debug
-              5'b0_1000: begin
+              6'b00_1000: begin
                 if (wbs_we_i && debug) begin
                 end
                 else begin
@@ -156,7 +184,7 @@ module proj_serial_divider #(
                 end
               end
               // REMAINDER at 32'h3000_000C is read-only unless debug
-              5'b0_1100: begin
+              6'b00_1100: begin
                 if (wbs_we_i && debug) begin
                   dbg_remainder <= wbs_dat_i;
                 end
@@ -165,7 +193,7 @@ module proj_serial_divider #(
                 end
               end
               // DEBUG at 32'h3000_0010 is set-on-write, clear-on-read
-              5'b1_0000: begin
+              6'b01_0000: begin
                 if (wbs_we_i) begin
                   debug <= 1'b1;
                 end
@@ -175,7 +203,7 @@ module proj_serial_divider #(
                 end
               end
               // FINI at 32'h3000_0014 is read-only (cannot be written)
-              5'b1_0100: begin
+              6'b01_0100: begin
                 if (wbs_we_i) begin
                   rdata <= rdata;
                 end
@@ -184,12 +212,12 @@ module proj_serial_divider #(
                 end
               end
               // START at 32'h3000_0018 is set-on-write-or-read (cannot be read)
-              5'b1_1000: begin
+              6'b01_1000: begin
                 start <= 1'b1;
                 rdata <= 32'h0000_0000;
               end
               // SW_BLINKY at 32'h3000_001C is set-on-write, clear-on-read
-              5'b1_1100: begin
+              6'b01_1100: begin
                 if (wbs_we_i) begin
                   sw_blinky_o <= 1'b1;
                 end
@@ -198,11 +226,20 @@ module proj_serial_divider #(
                   rdata <= 32'h0000_0000;
                 end
               end
+              // LA_SEL at 32'h3000_0020 is write/read
+              6'b10_0000: begin
+                if (wbs_we_i) begin
+                  la_sel <= wbs_dat_i[1:0];
+                end
+                else begin
+                  rdata <= { {30{1'b0}}, la_sel };
+                end
+              end
               // Accesses to all other addresses return error code (even on writes)
               default: begin
                 rdata <= 32'h0bad_0bad;  // TODO: set an error?
               end
-            endcase // (wbs_adr_i[7:4])
+            endcase // (wbs_adr_i[5:0])
           end // if (wbs_adr_i[WBW-1:WBW-4] == 4'h3)
         end //if (wbs_stb_i && !ack)
       end // if (reset_i)
@@ -267,4 +304,7 @@ module proj_serial_divider #(
     end // always @(posedge clk_i)
 
 endmodule // proj_serial_divider 
+
 `default_nettype wire
+
+`endif // _PROJ_SERIAL_DIVIDER_
