@@ -1884,7 +1884,7 @@ module mike_project(active, wb_clk_i, wb_rst_i, wbs_ack_o, wbs_cyc_i, wbs_stb_i,
     .VPWR(VPWR)
   );
   sky130_fd_sc_hd__diode_2 ANTENNA_10 (
-    .DIODE(_1037_),
+    .DIODE(_1036_),
     .VGND(VGND),
     .VNB(VGND),
     .VPB(VPWR),
@@ -1898,7 +1898,7 @@ module mike_project(active, wb_clk_i, wb_rst_i, wbs_ack_o, wbs_cyc_i, wbs_stb_i,
     .VPWR(VPWR)
   );
   sky130_fd_sc_hd__diode_2 ANTENNA_12 (
-    .DIODE(_1039_),
+    .DIODE(_1037_),
     .VGND(VGND),
     .VNB(VGND),
     .VPB(VPWR),
@@ -1912,7 +1912,7 @@ module mike_project(active, wb_clk_i, wb_rst_i, wbs_ack_o, wbs_cyc_i, wbs_stb_i,
     .VPWR(VPWR)
   );
   sky130_fd_sc_hd__diode_2 ANTENNA_14 (
-    .DIODE(_1040_),
+    .DIODE(_1039_),
     .VGND(VGND),
     .VNB(VGND),
     .VPB(VPWR),
@@ -1926,28 +1926,28 @@ module mike_project(active, wb_clk_i, wb_rst_i, wbs_ack_o, wbs_cyc_i, wbs_stb_i,
     .VPWR(VPWR)
   );
   sky130_fd_sc_hd__diode_2 ANTENNA_16 (
-    .DIODE(_1041_),
+    .DIODE(_1040_),
     .VGND(VGND),
     .VNB(VGND),
     .VPB(VPWR),
     .VPWR(VPWR)
   );
   sky130_fd_sc_hd__diode_2 ANTENNA_17 (
-    .DIODE(_1042_),
+    .DIODE(_1041_),
     .VGND(VGND),
     .VNB(VGND),
     .VPB(VPWR),
     .VPWR(VPWR)
   );
   sky130_fd_sc_hd__diode_2 ANTENNA_18 (
-    .DIODE(_1045_),
+    .DIODE(_1042_),
     .VGND(VGND),
     .VNB(VGND),
     .VPB(VPWR),
     .VPWR(VPWR)
   );
   sky130_fd_sc_hd__diode_2 ANTENNA_19 (
-    .DIODE(_1046_),
+    .DIODE(_1045_),
     .VGND(VGND),
     .VNB(VGND),
     .VPB(VPWR),
@@ -2017,21 +2017,21 @@ module mike_project(active, wb_clk_i, wb_rst_i, wbs_ack_o, wbs_cyc_i, wbs_stb_i,
     .VPWR(VPWR)
   );
   sky130_fd_sc_hd__diode_2 ANTENNA_4 (
-    .DIODE(_0438_),
+    .DIODE(_0016_),
     .VGND(VGND),
     .VNB(VGND),
     .VPB(VPWR),
     .VPWR(VPWR)
   );
   sky130_fd_sc_hd__diode_2 ANTENNA_5 (
-    .DIODE(_0508_),
+    .DIODE(_0438_),
     .VGND(VGND),
     .VNB(VGND),
     .VPB(VPWR),
     .VPWR(VPWR)
   );
   sky130_fd_sc_hd__diode_2 ANTENNA_6 (
-    .DIODE(_1034_),
+    .DIODE(_0508_),
     .VGND(VGND),
     .VNB(VGND),
     .VPB(VPWR),
@@ -2045,14 +2045,14 @@ module mike_project(active, wb_clk_i, wb_rst_i, wbs_ack_o, wbs_cyc_i, wbs_stb_i,
     .VPWR(VPWR)
   );
   sky130_fd_sc_hd__diode_2 ANTENNA_8 (
-    .DIODE(_1035_),
+    .DIODE(_1034_),
     .VGND(VGND),
     .VNB(VGND),
     .VPB(VPWR),
     .VPWR(VPWR)
   );
   sky130_fd_sc_hd__diode_2 ANTENNA_9 (
-    .DIODE(_1036_),
+    .DIODE(_1035_),
     .VGND(VGND),
     .VNB(VGND),
     .VPB(VPWR),
@@ -16176,13 +16176,7 @@ module mike_project(active, wb_clk_i, wb_rst_i, wbs_ack_o, wbs_cyc_i, wbs_stb_i,
     .VPB(VPWR),
     .VPWR(VPWR)
   );
-  sky130_fd_sc_hd__decap_4 FILLER_48_398 (
-    .VGND(VGND),
-    .VNB(VGND),
-    .VPB(VPWR),
-    .VPWR(VPWR)
-  );
-  sky130_fd_sc_hd__fill_1 FILLER_48_402 (
+  sky130_fd_sc_hd__decap_3 FILLER_48_398 (
     .VGND(VGND),
     .VNB(VGND),
     .VPB(VPWR),
@@ -34104,7 +34098,7 @@ module mike_project(active, wb_clk_i, wb_rst_i, wbs_ack_o, wbs_cyc_i, wbs_stb_i,
     .VPB(VPWR),
     .VPWR(VPWR)
   );
-  sky130_fd_sc_hd__fill_1 FILLER_99_269 (
+  sky130_fd_sc_hd__decap_3 FILLER_99_269 (
     .VGND(VGND),
     .VNB(VGND),
     .VPB(VPWR),
