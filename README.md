@@ -17,6 +17,8 @@ Having said that, the following tests are passing on my [single-project](https:/
 * ./multi_tool.py --config projects.yaml --force-delete --prove-wrapper
 * ./multi_tool.py --config projects.yaml --force-delete --test-caravel
 * ./multi_tool.py --config projects.yaml --force-delete --test-gds
+* ./multi_tool.py --config projects.yaml --force-delete --test-interface
+* ./multi_tool.py --config projects.yaml --force-delete --test-tristate
 
 Watch this space for further updates.
 
