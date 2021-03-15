@@ -87,7 +87,7 @@ module serial_divider_ftb #(
       end
     end
 
-    proj_serial_divider #(
+    serial_divider_project #(
         .WBW  (32),
         .LAW  (32),
         .XLEN (32),

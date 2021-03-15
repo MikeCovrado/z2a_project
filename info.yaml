@@ -15,8 +15,8 @@ caravel_test:
   recipe: "all"
   directory: "caravel_test"
   id: 4
-  module_name: "wrapper_serial_divider"
-  instance_name: "wrapper_serial_divider_id4"
+  module_name: "serial_divider_wrapper"
+  instance_name: "serial_divider_id4"
 
 # module test
 module_test:
@@ -34,7 +34,7 @@ wrapper_cksum:
   directory: "."
   instance_start: 70
   instance_end  : 81 # these lines will be removed before md5sum
-  filename: "src/wrapper_serial_divider.v"
+  filename: "src/serial_divider_wrapper.v"
 
 # openlane config, used in case I need to re-harden
 openlane:
@@ -43,12 +43,12 @@ openlane:
 
 # source required for various configs and module instantiation
 source:
-    - src/wrapper_serial_divider.v
-    - src/proj_serial_divider.v
+    - src/serial_divider_wrapper.v
+    - src/serial_divider_project.v
 
 # gds - check size = 300x300, nothing on metal 5, do a DRC, check 141 tristate buffers, check LVS
 gds:
   directory: "gds"
-  gds_filename: "wrapper_serial_divider.gds"
-  lvs_filename: "wrapper_serial_divider.lvs.powered.v"
-  lef_filename: "wrapper_serial_divider.lef"
+  gds_filename: "serial_divider_wrapper.gds"
+  lvs_filename: "serial_divider_wrapper.lvs.powered.v"
+  lef_filename: "serial_divider_wrapper.lef"

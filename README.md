@@ -15,10 +15,12 @@ However, none of this has been subjected to the [multi-project](https://github.c
 Having said that, the following tests are passing on my [single-project](https://github.com/MikeCovrado/multi_project_tools/tree/z2a_project) version of multi_project_tools:
 * ./multi_tool.py --config projects.yaml --force-delete --test-module
 * ./multi_tool.py --config projects.yaml --force-delete --prove-wrapper
-* ./multi_tool.py --config projects.yaml --force-delete --test-caravel
 * ./multi_tool.py --config projects.yaml --force-delete --test-gds
 * ./multi_tool.py --config projects.yaml --force-delete --test-interface
 * ./multi_tool.py --config projects.yaml --force-delete --test-tristate
+
+The following _was_ working and is now (temporarily) broken:
+* ./multi_tool.py --config projects.yaml --force-delete --test-caravel
 
 Watch this space for further updates.
 
